@@ -1,11 +1,11 @@
 ﻿#include "sheettest.h"
 #include "ui_sheettest.h"
 
-#define ROWS 12
+#define ROWS 30
 
 #define NO_Focus
 
-///< 用于取消鼠标选中某单元格时，会出现虚线框
+///< 用于取消鼠标选中某单元格时，会出现虚线框的效果
 #ifdef NO_Focus
 #include <QStyledItemDelegate>
 class NoFocusDelegate : public QStyledItemDelegate {
@@ -33,6 +33,22 @@ SheetTest::SheetTest(QWidget *parent)
 
 SheetTest::~SheetTest()
 {
+    ///< 经测试这个clear方式也会释放单元格中自定义的组件，所以下面的释放就不用了
+    /// 但仍需注意，调用了clear后就最好别再使用单元格中的组件了，以免造成异常(可能指针未置空，我懒得验证了)
+    qtw->clear();
+
+    /// 释放申请存放led的内存
+//    for (int i = 0; i < ROWS; i ++)
+//    {
+//        for (int j = 0; j < 3; j ++)
+//        {
+//            delete leds[i][j];
+//            ///< 注意，下面两个的释放顺序，qws[i][j]相当于las[i][j]的容器，需要后释放，否则会出异常
+//            delete las[i][j];
+//            delete qws[i][j];
+//        }
+//    }
+
     delete ui;
 }
 
@@ -204,7 +220,7 @@ void SheetTest::initUi()
         for (int j = 0; j < 3; j ++)
         {
             qtw->setCellWidget(i, j + 1, qws[i][j]);
-        }
+        }        
         qtw->setItem(i, 4, new QTableWidgetItem(QString(u8"       已熄灭")));
         qtw->item(i, 4)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
     }
